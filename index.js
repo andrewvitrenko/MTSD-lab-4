@@ -13,7 +13,8 @@ const options = commander.opts();
 const flags = {
   all: () => console.log("all"),
   finished: (value) => console.log("finished", value),
-  new: (value) => console.log("new", value),
+  new: ([title, description, deadline]) =>
+    console.log("new", title, description, deadline),
   expired: () => console.log("expired"),
   delete: (value) => console.log("delete", value),
 };
@@ -24,7 +25,9 @@ const handleFlags = (options) => {
 
   const currentFlag = optionKeys[0];
 
-  flags[currentFlag](options[currentFlag]);
+  const action = flags[currentFlag];
+  const actionProps = options[currentFlag];
+  action(actionProps);
 };
 
 handleFlags(options);
