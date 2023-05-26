@@ -6,18 +6,22 @@ class JSONFileService {
   }
 
   async getData() {
-    const data = await fs.readFile(this.filePath, "utf8").catch((error) => {
+    try {
+      const data = await fs.readFile(this.filePath, "utf8");
+      return JSON.parse(data).tasks;
+    } catch (error) {
       throw error;
-    });
-    return JSON.parse(data).tasks;
+    }
   }
 
   async updateData(newData) {
-    const data = JSON.stringify({ tasks: newData }, null, 2);
-    await fs.writeFile(this.filePath, data, "utf8").catch((error) => {
+    try {
+      const data = JSON.stringify({ tasks: newData }, null, 2);
+      await fs.writeFile(this.filePath, data, "utf8");
+      console.log("Data updated successfully.");
+    } catch (error) {
       throw error;
-    });
-    console.log("Data updated successfully.");
+    }
   }
 }
 
