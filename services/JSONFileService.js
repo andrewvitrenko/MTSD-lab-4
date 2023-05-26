@@ -1,29 +1,23 @@
 const fs = require("fs").promises;
 
 class JSONFileService {
-  constructor(filePath) {
+  constructor(filePath = "./db/db.json") {
     this.filePath = filePath;
   }
 
-  getData() {
-    return fs
-      .readFile(this.filePath, "utf8")
-      .then((data) => JSON.parse(data))
-      .catch((error) => {
-        throw error;
-      });
+  async getData() {
+    const data = await fs.readFile(this.filePath, "utf8").catch((error) => {
+      throw error;
+    });
+    return JSON.parse(data).tasks;
   }
 
-  updateData(newData) {
-    const data = JSON.stringify(newData, null, 2);
-    return fs
-      .writeFile(this.filePath, data, "utf8")
-      .then(() => {
-        console.log("Data updated successfully.");
-      })
-      .catch((error) => {
-        throw error;
-      });
+  async updateData(newData) {
+    const data = JSON.stringify({ tasks: newData }, null, 2);
+    await fs.writeFile(this.filePath, data, "utf8").catch((error) => {
+      throw error;
+    });
+    console.log("Data updated successfully.");
   }
 }
 
