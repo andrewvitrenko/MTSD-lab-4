@@ -27,14 +27,16 @@ class TodoService {
   /**
    * Complete single task
    * @param taskId {string}
+   * @returns {Todo}
    */
   complete(taskId) {
-    for (let task of this.tasks) {
-      if (taskId === task.id) {
-        task.isCompleted = true;
-        task.completedAt = dayjs().format();
-      }
-    }
+    this.tasks = this.tasks.map(task => task.id === taskId ? {
+      ...task,
+      isCompleted: true,
+      completedAt: dayjs().format(),
+    } : task);
+
+    return this.tasks.find(task => task.id === taskId);
   }
 
   /**
@@ -42,10 +44,13 @@ class TodoService {
    * @param {string} title
    * @param {string | undefined} description
    * @param {string | undefined} deadline
+   * @returns {Todo}
    */
   create(title, description, deadline) {
-    var newTask = new Todo({ title, description, deadline });
+    const newTask = new Todo({ title, description, deadline });
     this.tasks = [...this.tasks, newTask];
+
+    return this.tasks[this.tasks.length - 1];
   }
 
   /**
@@ -59,36 +64,37 @@ class TodoService {
   /**
    * Remove specific task
    * @param taskId {string}
+   * @returns {Todo[]}
    */
   remove(taskId) {
-    for (let i = 0; i < this.tasks.length; i++) {
-      var task = this.tasks[i];
-      if (taskId === task.id) {
-        this.tasks.splice(i, 1)
-      }
-    }
+    this.tasks = this.tasks.filter(task => task.id !== taskId);
+
+    return this.tasks;
   }
 
   /**
    * Edit separate task
    * @param taskId {string}
    * @param options {string[]}
+   * @returns {Todo}
    */
   edit(taskId, options) {
-    var edited = {};
-    for (let opt of options) {
-      var key = opt.split('=')[0];
-      var value = opt.split('=')[1];
-      edited[key] = value;
-    }
+    const edited = options.reduce((acc, option) => {
+      const [key, value] = option.split('=');
+      return {
+        ...acc,
+        [key]: value,
+      };
+    }, {});
 
-    for (let task of this.tasks) {
-      if (task.id === taskId) {
-        task.title = edited.title || task.title;
-        task.deadline = edited.deadline || task.deadline;
-        task.description = edited.description || task.description;
-      }
-    }
+    this.tasks = this.tasks.map(task => task.id === taskId ? {
+      ...task,
+      title: edited.title || task.title,
+      deadline: edited.deadline || task.deadline,
+      description: edited.description || task.description,
+    } : task);
+
+    return this.tasks.find(task => task.id === taskId);
   }
 }
 
