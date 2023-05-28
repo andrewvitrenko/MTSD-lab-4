@@ -1,42 +1,58 @@
 const dayjs = require('dayjs');
 const Todo = require('../schemas/todo');
+const JSONFileService = require('./JSONFileService');
 
 class TodoService {
-  /**
-   *
-   * @type {Todo[]}
-   */
-  tasks = new Array(10).fill(new Todo({ title: 'test title' }));
+  constructor() {
+    this.fileService = new JSONFileService();
+  }
 
   /**
    * Get active tasks
-   * @returns {Todo[]}
+   * @returns {Promise<Todo[]>}
    */
-  getActive() {
-    return this.tasks.filter(task => !task.isCompleted);
+  async getActive() {
+    try {
+      const tasks = await this.fileService.getData();
+      return tasks.filter(task => !task.isCompleted);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Get all tasks
-   * @returns {Todo[]}
+   * @returns {Promise<Todo[]>}
    */
-  getAll() {
-    return this.tasks;
+  async getAll() {
+    try {
+      const tasks = await this.fileService.getData();
+      return tasks;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Complete single task
    * @param taskId {string}
-   * @returns {Todo}
+   * @returns {Promise<Todo>}
    */
-  complete(taskId) {
-    this.tasks = this.tasks.map(task => task.id === taskId ? {
-      ...task,
-      isCompleted: true,
-      completedAt: dayjs().format(),
-    } : task);
+  async complete(taskId) {
+    try {
+      const tasks = await this.fileService.getData();
+      const updatedTasks = tasks.map(task => task.id === taskId ? {
+        ...task,
+        isCompleted: true,
+        completedAt: dayjs().format(),
+      } : task);
 
-    return this.tasks.find(task => task.id === taskId);
+      await this.fileService.updateData(updatedTasks);
+
+      return updatedTasks.find(task => task.id === taskId);
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -44,57 +60,81 @@ class TodoService {
    * @param {string} title
    * @param {string | undefined} description
    * @param {string | undefined} deadline
-   * @returns {Todo}
+   * @returns {Promise<Todo>}
    */
-  create(title, description, deadline) {
-    const newTask = new Todo({ title, description, deadline });
-    this.tasks = [...this.tasks, newTask];
+  async create(title, description, deadline) {
+    try {
+      const newTask = new Todo({ title, description, deadline });
+      const tasks = await this.fileService.getData();
 
-    return this.tasks[this.tasks.length - 1];
+      await this.fileService.updateData([...tasks, newTask]);
+
+      return newTask;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Get all expired tasks
-   * @returns {Todo[]}
+   * @returns {Promise<Todo[]>}
    */
-  getExpired() {
-    return this.tasks.filter(task => dayjs(task.deadline).isBefore(dayjs()));
+  async getExpired() {
+    try {
+      const tasks = await this.fileService.getData();
+      return tasks.filter(task => dayjs(task.deadline).isBefore(dayjs()));
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Remove specific task
    * @param taskId {string}
-   * @returns {Todo[]}
+   * @returns {Promise<Todo[]>}
    */
-  remove(taskId) {
-    this.tasks = this.tasks.filter(task => task.id !== taskId);
+  async remove(taskId) {
+    try {
+      const tasks = await this.fileService.getData();
+      const filteredTasks = tasks.filter(task => task.id !== taskId);
+      await this.fileService.updateData(filteredTasks);
 
-    return this.tasks;
+      return filteredTasks;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Edit separate task
    * @param taskId {string}
    * @param options {string[]}
-   * @returns {Todo}
+   * @returns {Promise<Todo>}
    */
-  edit(taskId, options) {
-    const edited = options.reduce((acc, option) => {
-      const [key, value] = option.split('=');
-      return {
-        ...acc,
-        [key]: value,
-      };
-    }, {});
+  async edit(taskId, options) {
+    try {
+      const updateData = options.reduce((acc, option) => {
+        const [key, value] = option.split('=');
+        return {
+          ...acc,
+          [key]: value,
+        };
+      }, {});
 
-    this.tasks = this.tasks.map(task => task.id === taskId ? {
-      ...task,
-      title: edited.title || task.title,
-      deadline: edited.deadline || task.deadline,
-      description: edited.description || task.description,
-    } : task);
+      const tasks = await this.fileService.getData();
+      const updatedTasks = tasks.map(task => task.id === taskId ? {
+        ...task,
+        title: updateData.title || task.title,
+        deadline: updateData.deadline || task.deadline,
+        description: updateData.description || task.description,
+      } : task);
 
-    return this.tasks.find(task => task.id === taskId);
+      await this.fileService.updateData(updatedTasks);
+
+      return updatedTasks.find(task => task.id === taskId);
+    } catch (error) {
+      throw error;
+    }
   }
 }
 
