@@ -3,7 +3,7 @@ const TodoService = require('./services/TodoService');
 
 commander
   .option("-a, --all", "Show all")
-  .option("-f, --finished <task_id>", "Mark some task as finished")
+  .option("-f, --finish <task_id>", "Mark some task as finished")
   .option("-n, --new <options...>", "Create new task")
   .option("-e, --expired", "Show expired tasks")
   .option("-d, --delete <task_id>", "Delete task")
@@ -14,7 +14,7 @@ const options = commander.opts();
 
 const flags = {
   all: () => TodoService.getAll(),
-  finished: (taskId) => TodoService.complete(taskId),
+  finish: (taskId) => TodoService.complete(taskId),
   new: ([title, description, deadline]) =>
     TodoService.create(title, description, deadline),
   expired: () => TodoService.getExpired(),
