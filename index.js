@@ -22,15 +22,20 @@ const flags = {
   edit: ([taskId, ...options]) => TodoService.edit(taskId, options),
 };
 
-const handleFlags = (options) => {
+const handleFlags = async (options) => {
   const optionKeys = Object.keys(options);
-  if (!optionKeys.length) return console.log(TodoService.getActive());
+  if (!optionKeys.length) return await TodoService.getActive();
 
   const currentFlag = optionKeys[0];
 
   const action = flags[currentFlag];
   const actionProps = options[currentFlag];
-  console.log(action(actionProps));
+  return await action(actionProps);
 };
 
-handleFlags(options);
+const start = async () => {
+  const output = await handleFlags(options);
+  console.log(output);
+}
+
+start();

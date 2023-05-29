@@ -1,10 +1,18 @@
 const fs = require("fs").promises;
 
 class JSONFileService {
+  /**
+   *
+   * @param filePath {string | undefined}
+   */
   constructor(filePath = "./db/db.json") {
     this.filePath = filePath;
   }
 
+  /**
+   * Get data from db
+   * @returns {Promise<Todo[]>}
+   */
   async getData() {
     try {
       const data = await fs.readFile(this.filePath, "utf8");
@@ -14,6 +22,11 @@ class JSONFileService {
     }
   }
 
+  /**
+   * Write data to db
+   * @param newData {Todo[]}
+   * @returns {Promise<void>}
+   */
   async updateData(newData) {
     try {
       const data = JSON.stringify({ tasks: newData }, null, 2);
