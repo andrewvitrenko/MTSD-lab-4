@@ -14,7 +14,10 @@ class TodoService {
   async getActive() {
     try {
       const tasks = await this.fileService.getData();
-      return tasks.filter(task => !task.isCompleted);
+      return tasks
+        .filter(task => !task.isCompleted)
+        .sort((next, prev) => -dayjs(next.deadline).isBefore(prev.deadline))
+        .map(task => ({ title: task.title, deadline: task.deadline }));
     } catch (error) {
       throw error;
     }
@@ -27,7 +30,7 @@ class TodoService {
   async getAll() {
     try {
       const tasks = await this.fileService.getData();
-      return tasks;
+      return tasks.map(({ title, deadline, completedAt }) => ({ title, deadline, completedAt }));
     } catch (error) {
       throw error;
     }
